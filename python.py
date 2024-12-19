@@ -7,6 +7,7 @@ import statsmodels.api as sm
 
 # Define the path to the SharePoint directory
 sharepoint_path = r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/Documents/GitHub"
+sharepoint_path = r"/Users/shreya/Library/CloudStorage/OneDrive-Personal/Documents/GitHub"
 
 sys.path.insert(0, sharepoint_path + r"/tools/Python/")
 import model_objects
@@ -83,7 +84,7 @@ model = sm.OLS(y, X).fit()
 print(model.summary())
 
 #Print Model Results
-model_resumts = model_objects.model_results(
+model_results = model_objects.model_results(
     model=model,
     train_data=train,
     test_data=test,
