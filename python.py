@@ -6,8 +6,7 @@ from sqlalchemy import create_engine
 import statsmodels.api as sm
 
 # Define the path to the SharePoint directory
-sharepoint_path = r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/Documents/GitHub"
-sharepoint_path = r"/Users/shreya/Library/CloudStorage/OneDrive-Personal/Documents/GitHub"
+sharepoint_path = os.getenv('HOME') + r"/Github"
 
 sys.path.insert(0, sharepoint_path + r"/tools/Python/")
 import model_objects
