@@ -83,44 +83,54 @@ dummy_vars = [
 # Combine numeric and dummy variables
 indep_vars = num_vars + dummy_vars
 
-p = 1
+
+def model_res(dep, indep, train, test=None, const='const', export_path=None):
+    # Define the dependent and independent variables for the model
+    X = train[indep]
+    y = train[dep]
+
+    # Add a constant to the model (intercept)
+    X = sm.add_constant(X)
+
+    # Create the linear regression model
+    model = sm.OLS(y, X).fit()
+
+    # Print the model summary
+    # print(model.summary())
+
+    #Print Model Results
+    return model_objects.model_results(
+        model=model,
+        train_data=train,
+        test_data=None,
+        dep_var=dep,
+        indep_vars=indep,
+        const='const',
+        export_path=None
+    )
+
+
+
 v = 11
+while v > 10:
+    
+    model_results = model_res(dep_var, indep_vars, train, test=None, const='const', export_path=None)
+    
+    v = model_results["VIF"].max()
+    if v > 10:
+        model_results.sort_values(by="VIF", ascending=False, inplace=True)
+        indep_vars = model_results.iloc[1:model_results.shape[0]-1, :]["Variable"].tolist()
+        print("'{}' eliminated \n {} features remain".format(
+            model_results.iloc[0, :]["Variable"],
+            model_results.shape[0]-2
+        ))
+    else:
+        pass
+
+p = 1
 while p > 0.05:
-    while v > 10:
-        # Define the dependent and independent variables for the model
-        X = train[indep_vars]
-        y = train[dep_var]
 
-        # Add a constant to the model (intercept)
-        X = sm.add_constant(X)
-
-        # Create the linear regression model
-        model = sm.OLS(y, X).fit()
-
-        # Print the model summary
-        # print(model.summary())
-
-        #Print Model Results
-        model_results = model_objects.model_results(
-            model=model,
-            train_data=train,
-            test_data=None,
-            dep_var=dep_var,
-            indep_vars=indep_vars,
-            const='const',
-            export_path=None
-        )
-        
-        v = model_results["VIF"].max()
-        if v > 10:
-            model_results.sort_values(by="VIF", ascending=False, inplace=True)
-            indep_vars = model_results.iloc[1:model_results.shape[0]-1, :]["Variable"].tolist()
-            print("'{}' eliminated \n {} features remain".format(
-                model_results.iloc[0, :]["Variable"],
-                model_results.shape[0]-2
-            ))
-        else:
-            pass
+    model_results = model_res(dep_var, indep_vars, train, test=None, const='const', export_path=None)
     
     p = model_results["p-value"].max()
     if p > 0.05:
