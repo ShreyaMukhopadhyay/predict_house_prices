@@ -1,8 +1,9 @@
 import os
 import sys
 import json
+import numpy as np
 import pandas as pd
-from sqlalchemy import create_engine
+import sqlite3
 import statsmodels.api as sm
 
 # Define the path to the SharePoint directory
@@ -15,24 +16,30 @@ import model_objects
 with open(sharepoint_path + r"/predict_house_prices/data_description.json", "r") as file:
     data_description = json.load(file)
 
-# MySQL connection details
-user = os.getenv('DB_USER')
-password = os.getenv('DB_PASSWORD')
-host = os.getenv('DB_HOST')
-database = r"house_prices"
-# Create a connection engine to the MySQL database
-engine = create_engine(f'mysql+mysqlconnector://{user}:{password}@{host}/{database}')
+# SQLite connection
+def import_table(table, database):
+    # Connect to the SQLite database
+    conn = sqlite3.connect(database)
+    # Read data into a DataFrame
+    df = pd.read_sql_query(f'SELECT * FROM {table}', conn)
+    return df
 
-# Importing the train dataset from the MySQL database
-train = pd.read_sql(
-    sql="SELECT * FROM train;",
-    con=engine
+
+
+# Importing the train dataset from SQL database
+train = import_table(
+    r"train",
+    r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/house_prices.db"
 )
-# Importing the test dataset from the MySQL database
-test = pd.read_sql(
-    sql="SELECT * FROM test;",
-    con=engine
+# Importing the test dataset from SQL database
+test = import_table(
+    r"test",
+    r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/house_prices.db"
 )
+
+# replace all empty values with np.nan. For example, '' is an empty value
+train.replace("", np.nan, inplace=True)
+test.replace("", np.nan, inplace=True)
 
 # Treating missing values
 for col in [
