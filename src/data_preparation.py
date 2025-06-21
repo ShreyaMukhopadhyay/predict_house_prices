@@ -3,39 +3,23 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-import sqlite3
 import statsmodels.api as sm
 
-# Define the path to the SharePoint directory
-sharepoint_path = os.getenv('HOME') + r"/Github"
+# Obtain full path for this file
+project_name = r"predict_house_prices"
+home_folder = os.path.abspath(__file__).split(project_name)[0] + project_name
 
-sys.path.insert(0, sharepoint_path + r"/tools/Python/")
+sys.path.insert(0, home_folder + r"/src/utilities/")
 import model_objects
 
 # Importing the data description JSON file
-with open(sharepoint_path + r"/predict_house_prices/data_description.json", "r") as file:
+with open(home_folder + r"/data_description.json", "r") as file:
     data_description = json.load(file)
 
-# SQLite connection
-def import_table(table, database):
-    # Connect to the SQLite database
-    conn = sqlite3.connect(database)
-    # Read data into a DataFrame
-    df = pd.read_sql_query(f'SELECT * FROM {table}', conn)
-    return df
-
-
-
-# Importing the train dataset from SQL database
-train = import_table(
-    r"train",
-    r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/house_prices.db"
-)
-# Importing the test dataset from SQL database
-test = import_table(
-    r"test",
-    r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/house_prices.db"
-)
+# Importing the train dataset
+train = pd.read_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/train.csv')
+# Importing the test dataset
+test = pd.read_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/test.csv')
 
 # replace all empty values with np.nan. For example, '' is an empty value
 train.replace("", np.nan, inplace=True)

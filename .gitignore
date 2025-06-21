@@ -1,3 +1,6 @@
 
 .DS_Store
+/pyvenv
 /.ipynb_checkpoints
+/src/__pycache__
+/src/utilities/__pycache__
