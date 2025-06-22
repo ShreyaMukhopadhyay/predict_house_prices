@@ -5,7 +5,6 @@ import statistics as stat
 import statsmodels.api as sm
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 import statsmodels.regression.linear_model
-from tqdm import tqdm
 
 def vif(
     X: pd.core.frame.DataFrame,
@@ -41,7 +40,7 @@ def vif(
     vif = pd.DataFrame()
     vif["VIF"] = [
         variance_inflation_factor(X.values, i) \
-        for i in tqdm(range(X.shape[1]))
+        for i in range(X.shape[1])
     ]
     vif["Variable"] = X.columns
     
@@ -179,21 +178,10 @@ def model_results(
             2) model accuracy (Adj. R-square, MAE, MAPE, WMAPE)
     """
 
-    try:
-        temp = pd.read_excel(
-            io=export_path,
-            sheet_name="Sheet1",
-            na_values=['#NA', '#N/A', '', ' ', 'na', 'NA']
-        )
-        iteration = temp['Iteration Number'].max() + 1
-    except:
-        iteration = 1
-
     result_table = pd.merge(
         left=pd.merge(
             left=pd.DataFrame(  # estimates of model parameters
                 data={
-                    'Iteration Number': iteration,
                     'Variable': model.params.index,
                     'Estimate': model.params
                 }
@@ -276,21 +264,9 @@ def model_results(
         result_table['Test MAE'] = np.nan
         result_table['Test MAPE'] = np.nan
         result_table['Test WMAPE'] = np.nan
-        
-    print("Iteration Number: {}".format(iteration))
 
     # exporting model results
     if export_path is not None:  # if export is required
-        if iteration > 1:  # if there is a file at 'export_path' location with previous iterations present
-            result_table = pd.concat(
-                [
-                    temp,
-                    result_table
-                ],
-                axis=0
-            )
-        else:  # if there is a file at 'export_path' location with no previous iterations present
-            None
         with pd.ExcelWriter(
             path=export_path,
             mode='w',

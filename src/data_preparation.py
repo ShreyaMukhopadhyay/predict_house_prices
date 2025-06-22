@@ -5,12 +5,14 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
+from utilities import missing_values
+
 # Obtain full path for this file
 project_name = r"predict_house_prices"
 home_folder = os.path.abspath(__file__).split(project_name)[0] + project_name
 
 sys.path.insert(0, home_folder + r"/src/utilities/")
-import model_objects
+import model_objects, missing_values
 
 # Importing the data description JSON file
 with open(home_folder + r"/data_description.json", "r") as file:
@@ -20,6 +22,10 @@ with open(home_folder + r"/data_description.json", "r") as file:
 train = pd.read_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/train.csv')
 # Importing the test dataset
 test = pd.read_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/test.csv')
+
+# changing the column names to lower case to match with data_description
+train.columns = [col.lower() for col in train.columns.values.tolist()]
+test.columns = [col.lower() for col in test.columns.values.tolist()]
 
 # replace all empty values with np.nan. For example, '' is an empty value
 train.replace("", np.nan, inplace=True)
@@ -41,6 +47,10 @@ for col in [
 ]:
     train[col]  = train[col].fillna(0)
     test[col]  = test[col].fillna(0)
+
+# Check missing values
+missing_values.check_missing_values(train)
+missing_values.check_missing_values(test)
 
 # Define the id and dependent variable column names
 id = "id"
@@ -111,7 +121,7 @@ while v > 10:
     if v > 10:
         model_results.sort_values(by="VIF", ascending=False, inplace=True)
         indep_vars = model_results.iloc[1:model_results.shape[0]-1, :]["Variable"].tolist()
-        print("'{}' eliminated \n {} features remain".format(
+        print("'{}' eliminated. {} features remain".format(
             model_results.iloc[0, :]["Variable"],
             model_results.shape[0]-2
         ))
@@ -127,12 +137,72 @@ while p > 0.05:
     if p > 0.05:
         model_results.sort_values(by="p-value", ascending=False, inplace=True)
         indep_vars = model_results.iloc[1:model_results.shape[0]-1, :]["Variable"].tolist()
-        print("'{}' eliminated \n {} features remain".format(
+        print("'{}' eliminated. {} features remain".format(
             model_results.iloc[0, :]["Variable"],
             model_results.shape[0]-2
         ))
     else:
         pass
 
-model_results.to_csv(os.getenv('HOME') + r"/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/p_val_elimination.csv", index=False)
 
+display(model_results)
+
+model_results["Base Variable"] = [i.split("_")[0] for i in model_results["Variable"]]
+
+
+feature_group = {
+    "Exterior Elements": ["exterior1st", "exterior2nd", "roofstyle", "roofmatl", "masvnrtype", "masvnrarea"],
+    "Basement Features": ["bsmtfinsf2", "bsmtfintype2", "bsmtfintype1", "bsmtqual", "bsmtexposure", "bsmtunfsf", "bsmtfullbath"],
+    "Neighborhood": ["neighborhood"],
+    "Property Type": ["mssubclass", "bldgtype", "housestyle"],
+    "Garage Features": ["garagequal", "garagetype"],
+    "Outdoor Areas": ["openporchsf", "screenporch", "wooddecksf"],
+    "Bathrooms": ["halfbath", "bsmtfullbath"],
+    "Land Features": ["landcontour", "landslope", "lotconfig", "lotarea"],
+    "Utilities": ["utilities"],
+    "Heating System": ["heatingqc"],
+    "Proximity to Conditions": ["condition1", "condition2"],
+    "Fireplace": ["fireplacequ"],
+    "Pool Features": ["poolqc", "poolarea"],
+    "Foundation": ["foundation"],
+    "Sale Conditions": ["salecondition"]
+}
+
+# map feature_group to "Base Variable" column in selected_features dataframe
+reverse_feature_group_map = {}
+for group, features in feature_group.items():
+    for feature in features:
+        reverse_feature_group_map[feature] = group
+
+def feature_grouping(feature):
+    if feature in reverse_feature_group_map:
+        return reverse_feature_group_map[feature]
+    else:
+        return None
+
+model_results['Group'] = model_results.apply(lambda row: feature_grouping(row["Base Variable"]), axis=1)
+
+
+
+
+model_results.to_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/p_val_elimination.csv', index=False)
+
+model_results["Variable"].values
+
+
+# plot a scatter plot between the two variables
+import matplotlib.pyplot as plt
+sys.path.insert(0, home_folder + r"/src/utilities/")
+import charting
+feature = r"lotfrontage"
+plt.scatter(train[feature], train[dep_var])
+# add a chart title
+plt.title(f"{feature} vs {dep_var}")
+plt.xlabel(feature)
+plt.ylabel(dep_var)
+
+# format the y-axis ticks as "#,##0 K", "#,##0 M", "#,##0 B"
+ax = plt.gca()
+ax.yaxis.set_major_formatter(plt.FuncFormatter(charting.format_y_tick))
+
+plt.show()
