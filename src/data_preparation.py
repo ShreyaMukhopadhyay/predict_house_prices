@@ -190,11 +190,19 @@ model_results.to_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shar
 model_results["Variable"].values
 
 
+def format_y_tick(value, currency: str = False):
+    if value >= 1_000_000_000:
+        return currency + f'{value / 1_000_000_000:,.0f}B'
+    elif value >= 1_000_000:
+        return currency + f'{value / 1_000_000:,.0f}M'
+    elif value >= 1_000:
+        return currency + f'{value / 1_000:,.1f}K'
+    else:
+        return value
+
 # plot a scatter plot between the two variables
 import matplotlib.pyplot as plt
-sys.path.insert(0, home_folder + r"/src/utilities/")
-import charting
-feature = r"lotfrontage"
+feature = r"bsmtfullbath"
 plt.scatter(train[feature], train[dep_var])
 # add a chart title
 plt.title(f"{feature} vs {dep_var}")
@@ -203,6 +211,23 @@ plt.ylabel(dep_var)
 
 # format the y-axis ticks as "#,##0 K", "#,##0 M", "#,##0 B"
 ax = plt.gca()
-ax.yaxis.set_major_formatter(plt.FuncFormatter(charting.format_y_tick))
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda value, _: format_y_tick(value, currency="$")))
 
 plt.show()
+
+
+format_y_tick(10000000, "$")
+
+
+# test for linearity between the two variables
+import seaborn as sns
+sns.regplot(x=feature, y=dep_var, data=train.loc[train[feature]!=0,:])
+ax = plt.gca()
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda value, _: format_y_tick(value, currency="$")))
+plt.show()
+
+# test for linearity between the two variables using F-test
+from scipy.stats import f_oneway
+for feature in num_vars:
+    f_test_statistic, p_value = f_oneway(train.loc[train[feature]!=0,:][dep_var], train.loc[train[feature]==0,:][dep_var])
+    print(f"Feature: {feature}, P-value: {p_value}")
