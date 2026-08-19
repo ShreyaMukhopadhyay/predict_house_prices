@@ -1,9 +1,11 @@
 import os
 import sys
 import json
+import dotenv
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from sqlalchemy import create_engine
 
 # Obtain full path for this file
 project_name = r"predict_house_prices"
@@ -16,16 +18,20 @@ import model_objects, missing_values
 with open(home_folder + r"/data_description.json", "r") as file:
     data_description = json.load(file)
 
-# Importing the train dataset
-train = pd.read_csv(
-    r'/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/train.csv',
-    na_values=["", " ", "NA", "N/A", "NaN", "nan", "None", "none", "NULL", "null", "Null"]
-).rename(columns=str.lower)  # changing the column names to lower case to match with data_description
-# Importing the test dataset
-test = pd.read_csv(
-    r'/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/test.csv',
-    na_values=["", " ", "NA", "N/A", "NaN", "nan", "None", "none", "NULL", "null", "Null"]
-).rename(columns=str.lower)  # changing the column names to lower case to match with data_description
+# Importing the train and test datasets from the house_price_prediction postgres database
+dotenv.load_dotenv(os.path.join(home_folder, ".env"))
+engine = create_engine(
+    "postgresql+psycopg2://{user}:{password}@{host}:{port}/house_price_prediction".format(
+        user=os.getenv("POSTGRES_USERNAME"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        host=os.getenv("POSTGRES_HOST"),
+        port=os.getenv("POSTGRES_PORT"),
+    )
+)
+
+train = pd.read_sql_table("train", engine)
+test = pd.read_sql_table("test", engine)
+engine.dispose()
 
 # Define the id and dependent variable column names
 id_col = "id"
@@ -44,33 +50,25 @@ cat_vars = [
 ]
 
 
-
-
-
-
-
-
-ordinal_cats = ['bsmtcond','bsmtfintype1','bsmtfintype2','bsmtqual','extercond','exterqual','fence','fireplacequ','functional','garagecond','garagequal','heatingqc','kitchenabvgr','kitchenqual','landslope','poolqc']
 missing_cats = ['alley','masvnrtype','bsmtqual','bsmtcond','bsmtexposure','bsmtfintype1','bsmtfintype2','electrical','fireplacequ','garagetype','garagefinish','garagequal','garagecond','poolqc','fence','miscfeature']
 no_missing_cats = [i for i in cat_vars if i not in missing_cats]
-missing_ordinal_cats = [i for i in missing_cats if i in ordinal_cats]
-no_missing_ordinal_cats = [i for i in no_missing_cats if i in ordinal_cats]
 
-## Missing ordinal_cat_vars in test
-## ['kitchenqual','functional']
-## Replace missing values in functional with "Typical Functionality" as per data description.json
+
+# Neighborhood-level median lotfrontage, computed from train only to avoid leakage
+lotfrontage_medians = train.groupby("neighborhood")["lotfrontage"].median()
 
 
 def missing_treatment(df):
     # Numeric Variables
     df["garageyrblt"] = df["garageyrblt"].fillna(
         df["yearbuilt"]
-    )                                                                          
+    )
+    df["lotfrontage"] = df["lotfrontage"].fillna(
+        df["neighborhood"].map(lotfrontage_medians)
+    )
     for col in num_vars:
-        df[col] = df[col].fillna(0)
-    
-    # Categorical Variables
-    df['functional'] = df['functional'].fillna("Typical Functionality")  # Replace missing values in functional with "Typical Functionality" as per data description.json
+        if col != "lotfrontage":
+            df[col] = df[col].fillna(0)
 
     return df
 

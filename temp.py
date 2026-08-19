@@ -21,7 +21,7 @@ def import_table(table, database):
 # Importing the train dataset from SQL database
 train = import_table(
     r"train",
-    r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/house_prices.db"
+    r"/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/house_prices.db"
 )
 # Function to split DataFrame based on data_description.json
 def split_dataframe(df, data_description):
@@ -47,7 +47,7 @@ def create_and_populate_db(splits, db_path):
     conn.close()
 
 # Define the path for the new SQLite database
-new_db_path = r"/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/new_house_prices.db"
+new_db_path = r"/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/sql_databases/sql_databases/new_house_prices.db"
 
 # Create and populate the new SQLite database
 create_and_populate_db(split_dfs, new_db_path)
