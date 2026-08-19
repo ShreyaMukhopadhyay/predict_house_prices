@@ -41,7 +41,7 @@
         "description": "Linear feet of street connected to property",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "lotarea": {
         "description": "Lot size in square feet",
@@ -352,7 +352,7 @@
         "description": "Masonry veneer area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "exterqual": {
         "description": "Evaluates the quality of the material on the exterior",
@@ -447,7 +447,7 @@
         "description": "Type 1 finished square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "bsmtfintype2": {
         "description": "Rating of basement finished area (if multiple types)",
@@ -467,19 +467,19 @@
         "description": "Type 2 finished square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "bsmtunfsf": {
         "description": "Unfinished square feet of basement area",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "totalbsmtsf": {
         "description": "Total square feet of basement area",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "heating": {
         "description": "Type of heating",
@@ -531,25 +531,25 @@
         "description": "First Floor square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "2ndflrsf": {
         "description": "Second floor square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "lowqualfinsf": {
         "description": "Low quality finished square feet (all floors)",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "grlivarea": {
         "description": "Above grade (ground) living area square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "bsmtfullbath": {
         "description": "Basement full bathrooms",
@@ -680,7 +680,7 @@
         "description": "Size of garage in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "garagequal": {
         "description": "Garage quality",
@@ -722,37 +722,37 @@
         "description": "Wood deck area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "openporchsf": {
         "description": "Open porch area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "enclosedporch": {
         "description": "Enclosed porch area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "3ssnporch": {
         "description": "Three season porch area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "screenporch": {
         "description": "Screen porch area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "poolarea": {
         "description": "Pool area in square feet",
         "values": {},
         "type": "numeric",
-        "dtype": "int64"
+        "dtype": "float64"
     },
     "poolqc": {
         "description": "Pool quality",

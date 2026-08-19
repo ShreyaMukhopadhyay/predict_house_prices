@@ -4,3 +4,4 @@
 /.ipynb_checkpoints
 /src/__pycache__
 /src/utilities/__pycache__
+/.pvenv

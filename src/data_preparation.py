@@ -5,8 +5,6 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from utilities import missing_values
-
 # Obtain full path for this file
 project_name = r"predict_house_prices"
 home_folder = os.path.abspath(__file__).split(project_name)[0] + project_name
@@ -19,58 +17,82 @@ with open(home_folder + r"/data_description.json", "r") as file:
     data_description = json.load(file)
 
 # Importing the train dataset
-train = pd.read_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/train.csv')
+train = pd.read_csv(
+    r'/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/train.csv',
+    na_values=["", " ", "NA", "N/A", "NaN", "nan", "None", "none", "NULL", "null", "Null"]
+).rename(columns=str.lower)  # changing the column names to lower case to match with data_description
 # Importing the test dataset
-test = pd.read_csv(r'/Users/shreya/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/test.csv')
-
-# changing the column names to lower case to match with data_description
-train.columns = [col.lower() for col in train.columns.values.tolist()]
-test.columns = [col.lower() for col in test.columns.values.tolist()]
-
-# replace all empty values with np.nan. For example, '' is an empty value
-train.replace("", np.nan, inplace=True)
-test.replace("", np.nan, inplace=True)
-
-# Treating missing values
-for col in [
-    "lotfrontage",
-    "masvnrarea",
-    "bsmtfinsf1",
-    "bsmtfinsf2",
-    "bsmtfullbath",
-    "bsmthalfbath",
-    "bsmtunfsf",
-    "totalbsmtsf",
-    "garagearea",
-    "garagecars",
-    "garageyrblt"
-]:
-    train[col]  = train[col].fillna(0)
-    test[col]  = test[col].fillna(0)
-
-# Check missing values
-missing_values.check_missing_values(train)
-missing_values.check_missing_values(test)
+test = pd.read_csv(
+    r'/Users/wrngnfreeman/Library/CloudStorage/OneDrive-Personal/shared_projects/Predict House Prices/test.csv',
+    na_values=["", " ", "NA", "N/A", "NaN", "nan", "None", "none", "NULL", "null", "Null"]
+).rename(columns=str.lower)  # changing the column names to lower case to match with data_description
 
 # Define the id and dependent variable column names
-id = "id"
+id_col = "id"
 dep_var = "saleprice"
 # List all numeric columns except id and dep_var
 num_vars = [
     col
     for col, details in data_description.items()
-    if details['dtype'] != 'object' and col not in [id, dep_var]
+    if details['dtype'] != 'object' and col not in [id_col, dep_var]
 ]
 # List all categorical columns except id and dep_var
 cat_vars = [
     col
     for col, details in data_description.items()
-    if details['dtype'] == 'object' and col not in [id, dep_var]
+    if details['dtype'] == 'object' and col not in [id_col, dep_var]
 ]
 
+
+
+
+
+
+
+
+ordinal_cats = ['bsmtcond','bsmtfintype1','bsmtfintype2','bsmtqual','extercond','exterqual','fence','fireplacequ','functional','garagecond','garagequal','heatingqc','kitchenabvgr','kitchenqual','landslope','poolqc']
+missing_cats = ['alley','masvnrtype','bsmtqual','bsmtcond','bsmtexposure','bsmtfintype1','bsmtfintype2','electrical','fireplacequ','garagetype','garagefinish','garagequal','garagecond','poolqc','fence','miscfeature']
+no_missing_cats = [i for i in cat_vars if i not in missing_cats]
+missing_ordinal_cats = [i for i in missing_cats if i in ordinal_cats]
+no_missing_ordinal_cats = [i for i in no_missing_cats if i in ordinal_cats]
+
+## Missing ordinal_cat_vars in test
+## ['kitchenqual','functional']
+## Replace missing values in functional with "Typical Functionality" as per data description.json
+
+
+def missing_treatment(df):
+    # Numeric Variables
+    df["garageyrblt"] = df["garageyrblt"].fillna(
+        df["yearbuilt"]
+    )                                                                          
+    for col in num_vars:
+        df[col] = df[col].fillna(0)
+    
+    # Categorical Variables
+    df['functional'] = df['functional'].fillna("Typical Functionality")  # Replace missing values in functional with "Typical Functionality" as per data description.json
+
+    return df
+
+
+train = missing_treatment(train)
+test = missing_treatment(test)
+
+
+
+
+# Check missing values
+missing_values.check_missing_values(train)
+missing_values.check_missing_values(test)
+
+
 # Convert categorical variables into dummy variables
-train = pd.get_dummies(train, columns=cat_vars, drop_first=True, dtype=int)
-test = pd.get_dummies(test, columns=cat_vars, drop_first=True, dtype=int)
+train = pd.get_dummies(train, columns=cat_vars, drop_first=False, dtype=int)
+test = pd.get_dummies(test, columns=cat_vars, drop_first=False, dtype=int)
+
+
+
+
 # Ensure the train and test datasets have the same dummy variables
 train, test = train.align(test, join='left', axis=1, fill_value=0)
 test.drop(columns=[dep_var], inplace=True)
@@ -78,7 +100,7 @@ test.drop(columns=[dep_var], inplace=True)
 dummy_vars = [
     col
     for col in train.columns.values.tolist()
-    if col not in [id, dep_var] + num_vars + cat_vars
+    if col not in [id_col, dep_var] + num_vars + cat_vars
 ]
 
 # Combine numeric and dummy variables
