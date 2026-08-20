@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from load_data import load_data
+from exception_handling import exception_handling
 
 train_df = load_data("train")
 data_description = load_data("data_dictionary")
@@ -26,3 +27,16 @@ cat_vars = [
     for col, dtype in column_dtypes.items()
     if dtype == "object" and col not in [id_col, dep_var]
 ]
+
+
+# exception case handling
+train_df = exception_handling(train_df)
+
+
+# missing treatment
+# (codes)
+
+
+# dummy creation
+# (codes)
+
