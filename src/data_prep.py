@@ -4,6 +4,7 @@ import pandas as pd
 from load_data import load_data
 from exception_handling import exception_handling
 from missing import missing_treatment
+from dummies import get_dummies
 
 train_df = load_data("train")
 data_description = load_data("data_dictionary")
@@ -39,5 +40,7 @@ train_df = missing_treatment(df=train_df, num_vars=num_vars)
 
 
 # dummy creation
-# (codes)
+train_df=get_dummies(df=train_df, cat_vars=cat_vars)
+
+display(train_df.head())
 
