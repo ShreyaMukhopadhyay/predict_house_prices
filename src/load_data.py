@@ -14,12 +14,12 @@ def get_target_engine():
 
 def load_data(dataset: str = "train") -> pd.core.frame.DataFrame:
     """
-    Loads the 'train' or 'test' table from the house_price_prediction PostgreSQL database
+    Loads the 'train', 'test', or 'data_dictionary' table from the house_price_prediction PostgreSQL database
 
     Parameters
     ----------
     dataset: str, default 'train'
-        Which table to load. Must be either 'train' or 'test'
+        Which table to load. Must be one of 'train', 'test', or 'data_dictionary'
 
     Returns
     -------
@@ -27,8 +27,8 @@ def load_data(dataset: str = "train") -> pd.core.frame.DataFrame:
         The requested table as a pandas DataFrame
     """
 
-    if dataset not in ("train", "test"):
-        raise ValueError("dataset must be either 'train' or 'test'")
+    if dataset not in ("train", "test", "data_dictionary"):
+        raise ValueError("dataset must be one of 'train', 'test', or 'data_dictionary'")
 
     engine = get_target_engine()
     try:
@@ -45,3 +45,6 @@ if __name__ == "__main__":
 
     test = load_data("test")
     print(f"Loaded 'test' table: {len(test)} rows")
+
+    data_dictionary = load_data("data_dictionary")
+    print(f"Loaded 'data_dictionary' table: {len(data_dictionary)} rows")
