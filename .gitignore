@@ -1,10 +1,10 @@
-
+.claude
 .DS_Store
-/pyvenv
+.env
+.pvenv
+.vscode
 /.ipynb_checkpoints
+/pyvenv
 /src/__pycache__
 /src/utilities/__pycache__
-/.pvenv
-.env
-.vscode/settings.json
 src/load_to_postgres.py
